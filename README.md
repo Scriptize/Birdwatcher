@@ -1,6 +1,6 @@
 # Birdwatcher 🐦
 
-### Birdwatcher is a bot that monitors specific Twitter users' tweets and sends alerts to a Telegram channel whenever a new tweet is posted. This bot uses the Twitter API to fetch the latest tweets from users, and it sends notifications to a specified Telegram channel. It continuously checks for new tweets, making sure you're always up to date on your favorite accounts.
+#### **Birdwatcher** is a bot that monitors specific Twitter users' tweets and sends alerts to a Telegram channel whenever a new tweet is posted. This bot uses the Twitter API to fetch the latest tweets from users, and it sends notifications to a specified Telegram channel. It continuously checks for new tweets, making sure you're always up to date on your favorite accounts.
 
 ## Features 🚀
 * Monitor multiple users: Set up a list of usernames, and Birdwatcher will track tweets from all of them.
