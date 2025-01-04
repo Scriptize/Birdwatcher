@@ -1,6 +1,6 @@
 import os
 import asyncio
-import telegram
+import telebot
 import tweepy
 import logging
 from datetime import datetime
@@ -35,14 +35,7 @@ logger = logging.getLogger()
 TW_CLIENT = tweepy.Client(TWITTER_BEARER_TOKEN)
 
 # Set up Telegram API
-TG_BOT = telegram.Bot(TELEGRAM_API_KEY)
-
-async def send_telegram_message(message: str):
-    try:
-        await TG_BOT.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-    except telegram.error.TelegramError as e:
-        logger.error(f"Error sending message to Telegram: {e}")
-
+TG_BOT = telebot.TeleBot(TELEGRAM_API_KEY, parse_mode=None)
 
 async def check_tweets(user_ids, last_tweet_ids, start_time):
     for user_id in user_ids:
@@ -83,6 +76,74 @@ async def check_tweets(user_ids, last_tweet_ids, start_time):
                 else:
                     logger.error(f"Full error object: {e}")
     return last_tweet_ids
+
+async def send_telegram_message(message):
+    TG_BOT.send_message(TELEGRAM_CHAT_ID, message)
+
+async def main():
+    usernames = USERS_TO_MONITOR.split(",")
+    user_ids = []
+    
+    # Get user IDs to monitor
+    for username in usernames:
+        try:
+            print("trying to get user")
+            user = TW_CLIENT.get_user(username=username.strip())
+            print("this is the issue")
+            if not user.data:
+                raise ValueError(f"User not found: {username}")
+            user_ids.append(user.data.id)
+            logger.info(f"🆔 Fetched user ID for {username}")
+        except Exception as e:
+            logger.error(f"Error fetching user ID for {username}: {e}")
+        
+        
+
+    # Initialize lastTweetIds with the latest tweet IDs
+    last_tweet_ids = {}
+    start_time = datetime.now().replace(microsecond=(datetime.now().microsecond // 1000) * 1000).isoformat() + "Z"
+
+
+    for user_id in user_ids:
+        try:
+            print("trying to get tweets")
+            response = TW_CLIENT.get_users_tweets(id=user_id, max_results=5)
+            print("this is the issue")
+            if response.data:
+                last_tweet_ids[user_id] = response.data[0].id
+                logger.info(f"🔍 Initialized last tweet ID for user ID {user_id}")
+            else:
+                last_tweet_ids[user_id] = None
+                logger.warning(f"⚠️ No initial tweets found for user ID {user_id}")
+        except Exception as e:
+            logger.error(f"Error fetching initial tweets for user ID {user_id}: {e}")
+
+    logger.info("🚀 Bot is up and running!")
+
+    # Continuous monitoring
+    while True:
+        await check_tweets(user_ids, last_tweet_ids, start_time)
+        logger.info("⏳ Waiting for the next fetch cycle")
+        await asyncio.sleep(120)  # Wait for 2 minutes
+
+# Run the main function
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 async def main():
     usernames = USERS_TO_MONITOR.split(",")
