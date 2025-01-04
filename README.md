@@ -19,7 +19,7 @@
 # Installation 🧑‍💻
 1. Clone the repository:
 ```
-git clone https://github.com/yourusername/birdwatcher.git
+git clone https://github.com/Scriptize/birdwatcher.git
 cd birdwatcher
 ```
 2. Install dependencies:
